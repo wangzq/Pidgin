@@ -49,7 +49,7 @@ public static class XmlParser
         from opening in _lt
         from body in _tagBody.Between(SkipWhitespaces)
         from closing in _slashGT
-        select new Tag(body.Name, body.Attributes, null);
+        select new Tag(body.Name, body.Attributes);
 
     private static readonly Parser<char, OpeningTagInfo> _openingTag =
         _tagBody
@@ -61,12 +61,21 @@ public static class XmlParser
             .Between(SkipWhitespaces)
             .Between(_ltSlash, _gt);
 
-    private static readonly Parser<char, Tag> _tag =
+    private static readonly Parser<char, Tag> _tagWithInnerText =
+        from open in _openingTag
+        from innerText in Token(c => c is not '<' and not '>').ManyString()
+        from close in ClosingTag
+        where open.Name.Equals(close, StringComparison.Ordinal)
+        select new Tag(open.Name, open.Attributes, innerText);
+
+    private static readonly Parser<char, Tag> _tagWithChildren =
         from open in _openingTag
         from children in Try(_node!).Separated(SkipWhitespaces).Between(SkipWhitespaces)
         from close in ClosingTag
         where open.Name.Equals(close, StringComparison.Ordinal)
         select new Tag(open.Name, open.Attributes, children);
+
+    private static readonly Parser<char, Tag> _tag = Try(_tagWithChildren).Or(_tagWithInnerText);
 
     private static readonly Parser<char, Tag> _node = Try(_emptyElementTag).Or(_tag);
 

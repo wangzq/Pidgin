@@ -15,7 +15,7 @@ public class XmlTest
     {
         {
             var input = "<foo/>";
-            var expected = new Tag("foo", Array.Empty<Attribute>(), null);
+            var expected = new Tag("foo", Array.Empty<Attribute>());
 
             var result = XmlParser.Parse(input);
 
@@ -29,7 +29,7 @@ public class XmlTest
     {
         {
             var input = "<foo bar=\"baz\" wibble=\"wobble\"/>";
-            var expected = new Tag("foo", new[] { new Attribute("bar", "baz"), new Attribute("wibble", "wobble") }, null);
+            var expected = new Tag("foo", new[] { new Attribute("bar", "baz"), new Attribute("wibble", "wobble") });
 
             var result = XmlParser.Parse(input);
 
@@ -55,6 +55,22 @@ public class XmlTest
     }
 
     [Fact]
+    public void TestParseTagWithInnerText()
+    {
+        var input = "<foo>bar</foo>";
+        var expected = new Tag("foo", Array.Empty<Attribute>(), "bar");
+
+        var result = XmlParser.Parse(input);
+        if (!result.Success)
+        {
+            throw new InvalidOperationException($"{result.Error}");
+        }
+
+        Assert.Equal("bar", result.Value.InnerText);
+        Assert.Equal(expected, result.Value);
+    }
+
+    [Fact]
     public void TestParseTagWithContentAndAttributes()
     {
         {
@@ -62,7 +78,7 @@ public class XmlTest
             var expected = new Tag(
                 "foo",
                 new[] { new Attribute("bar", "baz"), new Attribute("wibble", "wobble") },
-                new[] { new Tag("bar", Array.Empty<Attribute>(), Array.Empty<Tag>()), new Tag("baz", Array.Empty<Attribute>(), null) });
+                new[] { new Tag("bar", Array.Empty<Attribute>(), Array.Empty<Tag>()), new Tag("baz", Array.Empty<Attribute>()) });
 
             var result = XmlParser.Parse(input);
 

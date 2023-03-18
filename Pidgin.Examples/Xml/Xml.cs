@@ -13,6 +13,21 @@ public class Tag : IEquatable<Tag>
 
     public IEnumerable<Tag>? Content { get; }
 
+    public string? InnerText { get; }
+
+    public Tag(string name, IEnumerable<Attribute> attributes)
+    {
+        Name = name;
+        Attributes = attributes;
+    }
+
+    public Tag(string name, IEnumerable<Attribute> attributes, string? innerText)
+    {
+        Name = name;
+        Attributes = attributes;
+        InnerText = innerText;
+    }
+
     public Tag(string name, IEnumerable<Attribute> attributes, IEnumerable<Tag>? content)
     {
         Name = name;
@@ -34,8 +49,14 @@ public class Tag : IEquatable<Tag>
 
     public bool Equals(Tag? other)
         => Name == other?.Name
-        && Attributes.SequenceEqual(other.Attributes)
-        && ((Content is null && other.Content is null) || Content!.SequenceEqual(other.Content!));
+           && Attributes.SequenceEqual(other.Attributes)
+           && (SameContent(other!) || SameInnerText(other!));
+
+    private bool SameContent(Tag other) =>
+        (Content is null && other.Content is null) || Content!.SequenceEqual(other.Content!);
+
+    private bool SameInnerText(Tag other) =>
+        (InnerText is null && other.InnerText is null) || InnerText == other.InnerText;
 }
 
 [SuppressMessage(
@@ -67,7 +88,7 @@ public class Attribute : IEquatable<Attribute>
 
     public bool Equals(Attribute? other)
         => Name == other?.Name
-        && Value == other.Value;
+           && Value == other.Value;
 
     public override int GetHashCode() => HashCode.Combine(Name, Value);
 }
