@@ -21,14 +21,14 @@ public class Tag : IEquatable<Tag>
         Attributes = attributes;
     }
 
-    public Tag(string name, IEnumerable<Attribute> attributes, string? innerText)
+    public Tag(string name, IEnumerable<Attribute> attributes, string innerText)
     {
         Name = name;
         Attributes = attributes;
         InnerText = innerText;
     }
 
-    public Tag(string name, IEnumerable<Attribute> attributes, IEnumerable<Tag>? content)
+    public Tag(string name, IEnumerable<Attribute> attributes, IEnumerable<Tag> content)
     {
         Name = name;
         Attributes = attributes;
@@ -50,13 +50,10 @@ public class Tag : IEquatable<Tag>
     public bool Equals(Tag? other)
         => Name == other?.Name
            && Attributes.SequenceEqual(other.Attributes)
-           && (SameContent(other!) || SameInnerText(other!));
+           && (SameContent(other!) || InnerText == other.InnerText);
 
     private bool SameContent(Tag other) =>
         (Content is null && other.Content is null) || Content!.SequenceEqual(other.Content!);
-
-    private bool SameInnerText(Tag other) =>
-        (InnerText is null && other.InnerText is null) || InnerText == other.InnerText;
 }
 
 [SuppressMessage(
